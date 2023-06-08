@@ -15,7 +15,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 warnings.filterwarnings(action="ignore", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=FutureWarning)
-
+pd.set_option('display.max_columns', None)
 # Početno preprocesiranje podataka (proveriti da li postoje nedostajuće vrednosti ili anomalije, pretvoriti stringove u brojeve, izbaciti neke atribute ako je očigledno da ne utiču na formiranje izlaza i sl.)
 
 train_data = pd.read_csv("train.csv")
@@ -35,10 +35,10 @@ test_data = test_data.drop(test_data.iloc[:, [0, 1]], axis=1)
 
 # Provera balansiranosti skupa - Vidimo da nam je skup poprilicno izbalansiran
 plt.pie(train_data.satisfaction.value_counts(), labels=[
-        "Neutral or dissatisfied", "Satisfied"], colors=sns.color_palette("YlOrBr"), autopct='%1.1f%%')
+        "Neutral or dissatisfied", "Satisfied"], colors=sns.color_palette("Greens"), autopct='%1.1f%%')
 # plt.show()
 
-# Provera nedostajucih vrednosti
+# # Provera nedostajucih vrednosti
 # print(train_data.isnull().sum())
 # print("#######################")
 # print(test_data.isnull().sum())
@@ -55,14 +55,14 @@ test_data['Arrival Delay in Minutes'].fillna(
 correlation_matrix = train_data[numeric_columns].corr()
 
 # Prikazivanje korelacione matrice kao toplotne mape
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+sns.heatmap(correlation_matrix, annot=True, cmap='Greens')
 plt.title('Korelaciona matrica numeričkih promenljivih')
 # plt.show()
 
 
 # Scatter plot prikaz zavisnosti dve kolone
 plt.scatter(train_data['Arrival Delay in Minutes'],
-            train_data['Departure Delay in Minutes'], alpha=0.5)
+            train_data['Departure Delay in Minutes'], alpha=0.5, color='green')
 # plt.show()
 
 
@@ -74,16 +74,14 @@ test_data = test_data.drop('Arrival Delay in Minutes', axis=1)
 numeric_columns = ['Age', 'Flight Distance',
                    'Departure Delay in Minutes']
 
-# Eksplorativna analiza skupa (proveriti da li postoje neke jake korelacije, prikazati na grafiku raspodelu ciljnog atributa u odnosu na neke nezavisne promenljive i sl.)
-
 # Vecina putnika koji su leteli economy ili economy plus klasom su bili nezadovoljni, a biznis su zadovoljni
-sns.countplot(x='Class', hue='satisfaction', palette="YlOrBr", data=train_data)
+sns.countplot(x='Class', hue='satisfaction', palette="Greens", data=train_data)
 # plt.show()
 
 
 # Svi koji su rejtovali wifi sa  5 zvezdica su zadovoljni
 sns.countplot(x='Inflight wifi service', hue='satisfaction',
-              palette="YlOrBr", data=train_data)
+              palette="Greens", data=train_data)
 # plt.show()
 
 
@@ -96,14 +94,14 @@ satisfied_gender_counts = train_data[train_data['satisfaction']
 
 satisfied_percentages = satisfied_gender_counts / gender_counts * 100
 
-plt.bar(satisfied_percentages.index,
-        satisfied_percentages.values, color=['blue', 'red'])
+plt.bar(satisfied_percentages.index, satisfied_percentages.values,
+        color=['green', 'darkgreen'])
 plt.title('Procenat zadovoljstva putnika prema polu')
-plt.xlabel('Gender')
-plt.ylabel('Percentage')
+plt.xlabel('Pol')
+plt.ylabel('Procenat')
 plt.xticks(ticks=[0, 1], labels=['Male', 'Female'])
 plt.ylim(0, 100)
-# plt.show()
+# # plt.show()
 
 
 # Zadovoljstvo i godine
@@ -114,7 +112,7 @@ age_satisfaction = train_data.groupby('Age')['satisfaction'].value_counts(
     normalize=True).unstack().reset_index()
 
 axes[0].plot(age_satisfaction['Age'],
-             age_satisfaction['satisfied'] * 100, label='Satisfied')
+             age_satisfaction['satisfied'] * 100, label='Satisfied', color='green')
 axes[0].set_title('Zadovoljstvo putnika u odnosu na starost')
 axes[0].set_xlabel('Starost')
 axes[0].set_ylabel('Procenat zadovoljstva')
@@ -124,7 +122,8 @@ axes[0].legend()
 age_legroom = train_data.groupby(
     'Age')['Leg room service'].mean().reset_index()
 
-axes[1].plot(age_legroom['Age'], age_legroom['Leg room service'])
+axes[1].plot(age_legroom['Age'],
+             age_legroom['Leg room service'], color='green')
 axes[1].set_title('Ocene "Leg room service" u odnosu na starost')
 axes[1].set_xlabel('Starost')
 axes[1].set_ylabel('Ocena "Leg room service"')
@@ -133,7 +132,7 @@ axes[1].set_ylabel('Ocena "Leg room service"')
 age_wifi = train_data.groupby(
     'Age')['Inflight wifi service'].mean().reset_index()
 
-axes[2].plot(age_wifi['Age'], age_wifi['Inflight wifi service'])
+axes[2].plot(age_wifi['Age'], age_wifi['Inflight wifi service'], color='green')
 axes[2].set_title('Ocene "Inflight wifi service" u odnosu na starost')
 axes[2].set_xlabel('Starost')
 axes[2].set_ylabel('Ocena "Inflight wifi service"')
@@ -145,17 +144,18 @@ plt.tight_layout()  # Za bolji raspored subplotova
 # Raspodela klasa letenja po godinama
 age_class = train_data.groupby(['Age', 'Class']).size().unstack()
 
-age_class.plot(kind='bar', stacked=True)
+age_class.plot(kind='bar', stacked=True, color=[
+               "#92D050", "#00B050", "#00B0F0"])
 plt.title('Raspodela klasa letenja u odnosu na starost')
 plt.xlabel('Starost')
 plt.ylabel('Broj putnika')
 plt.legend(title='Klasa letenja')
-# plt.show()
+# # plt.show()
 
 
 # Broj lojalnih putnika po godinama
 sns.histplot(train_data, x="Age", hue="Customer Type",
-             multiple="stack", palette="YlOrBr", edgecolor=".3", linewidth=.5)
+             multiple="stack", palette="Greens", edgecolor=".3", linewidth=.5)
 # plt.show()
 
 
@@ -186,6 +186,15 @@ for column in numeric_columns:
 
 print("Anomaly count: ", anomaly_counts)
 
+plt.figure(figsize=(8, 6))
+sns.histplot(train_data['Departure Delay in Minutes'],
+             bins=30, kde=True, color='green')
+plt.xlabel('Departure Delay in Minutes')
+plt.ylabel('Frekvencija')
+plt.title('Distribucija Departure Delay in Minutes')
+# plt.show()
+
+
 # Primeti se velik broj anomalija u departure delay pa nju transformisemo
 train_data['Departure Delay in Minutes'] = np.log(
     train_data['Departure Delay in Minutes'] + 1)
@@ -199,6 +208,16 @@ anomalies = (z_scores > 3)
 print(
     f"Number of anomalies in {'Departure Delay in Minutes'} after transformation: {anomalies.sum()}")
 
+plt.figure(figsize=(8, 6))
+sns.histplot(train_data['Departure Delay in Minutes'],
+             bins=30, kde=True, color='green')
+plt.xlabel('Departure Delay in Minutes')
+plt.ylabel('Frekvencija')
+plt.title('Distribucija Departure Delay in Minutes')
+# plt.show()
+
+# print(train_data.head())
+
 # Kreiranje modela koji će vršiti klasifikaciju (obratiti pažnju na sve faktore koji utiču na to da li će neki algoritam dati dobre rezultate za određeni problem)
 models = [LogisticRegression(), KNeighborsClassifier(),
           RandomForestClassifier(), DecisionTreeClassifier()]
@@ -209,40 +228,40 @@ y_test = test_data["satisfaction"]
 X_test = test_data.drop("satisfaction", axis=1)
 
 # Izbor modela - RandomForestClassifier i DecisionTree daju najbolje rezultate
-# fig, axs = plt.subplots(2, 2, figsize=(10, 10))
-# for i, model in enumerate(models):
-#     model.fit(X_train, y_train)
-#     y_predict = model.predict(X_test)
-#     print("Za model ", type(model).__name__, " rezultati su: ")
-#     print("\tTacnost: ", accuracy_score(y_test, y_predict))
-#     print("\tPreciznost: ", precision_score(y_test, y_predict))
-#     print("\tOdziv: ", recall_score(y_test, y_predict))
-#     print("\tF1 score: ", f1_score(y_test, y_predict))
+fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+for i, model in enumerate(models):
+    model.fit(X_train, y_train)
+    y_predict = model.predict(X_test)
+    print("Za model ", type(model).__name__, " rezultati su: ")
+    print("\tTacnost: ", accuracy_score(y_test, y_predict))
+    print("\tPreciznost: ", precision_score(y_test, y_predict))
+    print("\tOdziv: ", recall_score(y_test, y_predict))
+    print("\tF1 score: ", f1_score(y_test, y_predict))
 
-#     cm = confusion_matrix(y_test, y_predict)
+    cm = confusion_matrix(y_test, y_predict)
 
-#     group_names = ['True Neg', 'False Pos', 'False Neg', 'True Pos']
-#     group_counts = ["{0:0.0f}".format(value) for value in cm.flatten()]
-#     labels = [f"{v1}\n{v2}" for v1, v2 in zip(group_names, group_counts)]
-#     labels = np.asarray(labels).reshape(2, 2)
+    group_names = ['True Neg', 'False Pos', 'False Neg', 'True Pos']
+    group_counts = ["{0:0.0f}".format(value) for value in cm.flatten()]
+    labels = [f"{v1}\n{v2}" for v1, v2 in zip(group_names, group_counts)]
+    labels = np.asarray(labels).reshape(2, 2)
 
-#     sns.heatmap(cm, annot=labels, fmt='', cmap='Blues', ax=axs[i // 2, i % 2])
-#     axs[i // 2, i % 2].set_title(type(model).__name__)
-#     axs[i // 2, i % 2].set_xlabel('Predicted')
-#     axs[i // 2, i % 2].set_ylabel('True')
-#     print("\tMatrica konfuzije: ", cm)
+    sns.heatmap(cm, annot=labels, fmt='', cmap='Greens', ax=axs[i // 2, i % 2])
+    axs[i // 2, i % 2].set_title(type(model).__name__)
+    axs[i // 2, i % 2].set_xlabel('Predicted')
+    axs[i // 2, i % 2].set_ylabel('True')
+    print("\tMatrica konfuzije: ", cm)
 
-#     print("\tUnakrsna validacija: ")
-#     # Izvršavanje kros-validacije sa 5 foldova
-#     scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
-#     # Prikaz rezultata svakog folda
-#     for fold, score in enumerate(scores):
-#         print(f"\t\tRezultat za fold {fold+1}: {score}")
-#     # Prikaz prosečne tačnosti
-#     average_accuracy = scores.mean()
-#     print(f"\t\tProsečna tačnost: {average_accuracy}")
+    print("\tUnakrsna validacija: ")
+    # Izvršavanje kros-validacije sa 5 foldova
+    scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
+    # Prikaz rezultata svakog folda
+    for fold, score in enumerate(scores):
+        print(f"\t\tRezultat za fold {fold+1}: {score}")
+    # Prikaz prosečne tačnosti
+    average_accuracy = scores.mean()
+    print(f"\t\tProsečna tačnost: {average_accuracy}")
 
-# plt.tight_layout()
+plt.tight_layout()
 # plt.show()
 
 # RandomForest vs DecisionTree, podesavanje hiperparametara
@@ -329,20 +348,21 @@ sorted_importance = feature_importance[sorted_indices]
 # Prikazivanje značajnosti atributa u obliku grafa
 plt.figure(figsize=(10, 6))
 plt.bar(range(len(sorted_importance)),
-        sorted_importance, tick_label=sorted_features)
+        sorted_importance, tick_label=sorted_features, color='green')
 plt.xticks(rotation=90)
 plt.xlabel('Atributi')
 plt.ylabel('Značajnost')
 plt.title('Značajnost atributa u Random Forest modelu')
 # plt.show()
 
+
 # Izbacivanje manje znacajnih atributa
 y_train = train_data["satisfaction"]
 X_train = train_data.drop(
-    ["satisfaction", "Gender_Male", "Gender_Female"], axis=1)
+    ["satisfaction", "Gender_Male", "Gender_Female", "Food and drink"], axis=1)
 y_test = test_data["satisfaction"]
 X_test = test_data.drop(
-    ["satisfaction", "Gender_Male", "Gender_Female"], axis=1)
+    ["satisfaction", "Gender_Male", "Gender_Female", "Food and drink"], axis=1)
 
 rf_model.fit(X_train, y_train)
 y_predict = rf_model.predict(X_test)
