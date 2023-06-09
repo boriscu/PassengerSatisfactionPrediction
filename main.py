@@ -16,8 +16,8 @@ from sklearn.tree import DecisionTreeClassifier
 warnings.filterwarnings(action="ignore", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=FutureWarning)
 pd.set_option('display.max_columns', None)
-# Početno preprocesiranje podataka (proveriti da li postoje nedostajuće vrednosti ili anomalije, pretvoriti stringove u brojeve, izbaciti neke atribute ako je očigledno da ne utiču na formiranje izlaza i sl.)
 
+# Početno preprocesiranje podataka (proveriti da li postoje nedostajuće vrednosti ili anomalije, pretvoriti stringove u brojeve, izbaciti neke atribute ako je očigledno da ne utiču na formiranje izlaza i sl.)
 train_data = pd.read_csv("train.csv")
 test_data = pd.read_csv("test.csv")
 
@@ -26,8 +26,8 @@ numeric_columns = ['Age', 'Flight Distance',
                    'Departure Delay in Minutes', 'Arrival Delay in Minutes']
 
 # Pregled podataka
-# train_data.info()
-# test_data.info()
+train_data.info()
+test_data.info()
 
 # Prve dve kolone su beskorisne (Unamed, id)
 train_data = train_data.drop(train_data.iloc[:, [0, 1]], axis=1)
@@ -36,12 +36,12 @@ test_data = test_data.drop(test_data.iloc[:, [0, 1]], axis=1)
 # Provera balansiranosti skupa - Vidimo da nam je skup poprilicno izbalansiran
 plt.pie(train_data.satisfaction.value_counts(), labels=[
         "Neutral or dissatisfied", "Satisfied"], colors=sns.color_palette("Greens"), autopct='%1.1f%%')
-# plt.show()
+plt.show()
 
-# # Provera nedostajucih vrednosti
-# print(train_data.isnull().sum())
-# print("#######################")
-# print(test_data.isnull().sum())
+# Provera nedostajucih vrednosti
+print(train_data.isnull().sum())
+print("#######################")
+print(test_data.isnull().sum())
 
 # Popunjavanje nedostajucih vrednosti koje se nalaze samo u koloni arrival delay in minutes
 #  Medijana je otporna na ekstremne vrednosti
@@ -57,13 +57,13 @@ correlation_matrix = train_data[numeric_columns].corr()
 # Prikazivanje korelacione matrice kao toplotne mape
 sns.heatmap(correlation_matrix, annot=True, cmap='Greens')
 plt.title('Korelaciona matrica numeričkih promenljivih')
-# plt.show()
+plt.show()
 
 
 # Scatter plot prikaz zavisnosti dve kolone
 plt.scatter(train_data['Arrival Delay in Minutes'],
             train_data['Departure Delay in Minutes'], alpha=0.5, color='green')
-# plt.show()
+plt.show()
 
 
 # Nakon primecivanja jake korelacije izmedju arrival i departure delay dropujemo arrival delay
@@ -76,13 +76,13 @@ numeric_columns = ['Age', 'Flight Distance',
 
 # Vecina putnika koji su leteli economy ili economy plus klasom su bili nezadovoljni, a biznis su zadovoljni
 sns.countplot(x='Class', hue='satisfaction', palette="Greens", data=train_data)
-# plt.show()
+plt.show()
 
 
 # Svi koji su rejtovali wifi sa  5 zvezdica su zadovoljni
 sns.countplot(x='Inflight wifi service', hue='satisfaction',
               palette="Greens", data=train_data)
-# plt.show()
+plt.show()
 
 
 # Procenat zadovoljstva putnika po polu
@@ -101,7 +101,7 @@ plt.xlabel('Pol')
 plt.ylabel('Procenat')
 plt.xticks(ticks=[0, 1], labels=['Male', 'Female'])
 plt.ylim(0, 100)
-# # plt.show()
+plt.show()
 
 
 # Zadovoljstvo i godine
@@ -138,7 +138,7 @@ axes[2].set_xlabel('Starost')
 axes[2].set_ylabel('Ocena "Inflight wifi service"')
 
 plt.tight_layout()  # Za bolji raspored subplotova
-# plt.show()
+plt.show()
 
 
 # Raspodela klasa letenja po godinama
@@ -150,13 +150,13 @@ plt.title('Raspodela klasa letenja u odnosu na starost')
 plt.xlabel('Starost')
 plt.ylabel('Broj putnika')
 plt.legend(title='Klasa letenja')
-# # plt.show()
+plt.show()
 
 
 # Broj lojalnih putnika po godinama
 sns.histplot(train_data, x="Age", hue="Customer Type",
              multiple="stack", palette="Greens", edgecolor=".3", linewidth=.5)
-# plt.show()
+plt.show()
 
 
 # One-hot kodiranje za nezavisne kategoričke kolone
@@ -192,7 +192,7 @@ sns.histplot(train_data['Departure Delay in Minutes'],
 plt.xlabel('Departure Delay in Minutes')
 plt.ylabel('Frekvencija')
 plt.title('Distribucija Departure Delay in Minutes')
-# plt.show()
+plt.show()
 
 
 # Primeti se velik broj anomalija u departure delay pa nju transformisemo
@@ -214,9 +214,7 @@ sns.histplot(train_data['Departure Delay in Minutes'],
 plt.xlabel('Departure Delay in Minutes')
 plt.ylabel('Frekvencija')
 plt.title('Distribucija Departure Delay in Minutes')
-# plt.show()
-
-# print(train_data.head())
+plt.show()
 
 # Kreiranje modela koji će vršiti klasifikaciju (obratiti pažnju na sve faktore koji utiču na to da li će neki algoritam dati dobre rezultate za određeni problem)
 models = [LogisticRegression(), KNeighborsClassifier(),
@@ -262,7 +260,7 @@ for i, model in enumerate(models):
     print(f"\t\tProsečna tačnost: {average_accuracy}")
 
 plt.tight_layout()
-# plt.show()
+plt.show()
 
 # RandomForest vs DecisionTree, podesavanje hiperparametara
 
@@ -272,38 +270,39 @@ param_grid_rf = {
     'min_samples_leaf': [1, 2],
 }
 
-# param_grid_dt = {
-#     'criterion': ['gini', 'entropy'],
-#     'ccp_alpha': [0, 0.001, 0.01, 0.1, 0.2],
-#     'max_depth': [5, 10, 30, 50, 70, 90, 100, None],
-# }
+param_grid_dt = {
+    'criterion': ['gini', 'entropy'],
+    'ccp_alpha': [0, 0.001, 0.01, 0.1, 0.2],
+    'max_depth': [5, 10, 30, 50, 70, 90, 100, None],
+}
 
-# dt_model = DecisionTreeClassifier()
-# dt_model.fit(X_train, y_train)
-# y_predict = dt_model.predict(X_test)
-# init_acc = accuracy_score(y_test, y_predict)
-# print("Tacnost za Decision Tree pre podesavanja hiperparametara je: ",
-#       init_acc)
+dt_model = DecisionTreeClassifier()
+dt_model.fit(X_train, y_train)
+y_predict = dt_model.predict(X_test)
+init_acc = accuracy_score(y_test, y_predict)
+print("Tacnost za Decision Tree pre podesavanja hiperparametara je: ",
+      init_acc)
 
-# grid_search_dt = GridSearchCV(dt_model, param_grid_dt, cv=5)
-# grid_search_dt.fit(X_train, y_train)
-# print("Najbolji parametri za Decision Tree su: ", grid_search_dt.best_params_)
-# dt_model.criterion = grid_search_dt.best_params_["criterion"]
-# dt_model.max_depth = grid_search_dt.best_params_["max_depth"]
-# dt_model.ccp_alpha = grid_search_dt.best_params_[
-#     "ccp_alpha"]
-# dt_model.fit(X_train, y_train)
-# y_predict = dt_model.predict(X_test)
-# final_acc = accuracy_score(y_test, y_predict)
-# print("Tacnost za Decision Tree posle podesavanja hiperparametara je: ",
-#       final_acc)
+grid_search_dt = GridSearchCV(dt_model, param_grid_dt, cv=5)
+grid_search_dt.fit(X_train, y_train)
+print("Najbolji parametri za Decision Tree su: ", grid_search_dt.best_params_)
+dt_model.criterion = grid_search_dt.best_params_["criterion"]
+dt_model.max_depth = grid_search_dt.best_params_["max_depth"]
+dt_model.ccp_alpha = grid_search_dt.best_params_[
+    "ccp_alpha"]
+dt_model.fit(X_train, y_train)
+y_predict = dt_model.predict(X_test)
+final_acc = accuracy_score(y_test, y_predict)
+print("Tacnost za Decision Tree posle podesavanja hiperparametara je: ",
+      final_acc)
 
-# if final_acc > init_acc:
-#     print("Podesavanje hiperparametara za Decision Tree je uspesno")
+if final_acc > init_acc:
+    print("Podesavanje hiperparametara za Decision Tree je uspesno")
 
 # Najbolji parametri za Decision Tree su:  {'ccp_alpha': 0, 'criterion': 'entropy', 'max_depth': None}
 # Tacnost za Decision Tree posle podesavanja hiperparametara je:  0.9473360024638128
 
+# Zakomentarisano je jer podesavanje traje po 20 min
 # rf_model = RandomForestClassifier()
 # rf_model.fit(X_train, y_train)
 # y_predict = rf_model.predict(X_test)
@@ -353,7 +352,7 @@ plt.xticks(rotation=90)
 plt.xlabel('Atributi')
 plt.ylabel('Značajnost')
 plt.title('Značajnost atributa u Random Forest modelu')
-# plt.show()
+plt.show()
 
 
 # Izbacivanje manje znacajnih atributa
